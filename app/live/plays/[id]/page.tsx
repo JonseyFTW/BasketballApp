@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Star, Clock, Target, Users, Heart, Share2, Download, RotateCcw } from 'lucide-react'
-import { Court } from '@/components/play-designer/Court'
+import { CourtViewer } from '@/components/play-designer/CourtViewer'
 import Link from 'next/link'
 
 interface PlayWithRelations extends Play {
@@ -199,7 +199,7 @@ export default function LivePlayView() {
               <CardContent>
                 <div id="court-container" className="w-full">
                   <div className="bg-gray-100 rounded-lg p-4" style={{ minHeight: '400px' }}>
-                    <Court
+                    <CourtViewer
                       width={courtSize.width}
                       height={courtSize.height}
                       players={(play.diagramJSON as any)?.players || []}

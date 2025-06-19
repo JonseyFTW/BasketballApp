@@ -19,10 +19,11 @@ export function ActionLine({
   readOnly = false, 
   isPreview = false 
 }: ActionLineProps) {
-  const fromX = action.from.x || 0
-  const fromY = action.from.y || 0
-  const toX = action.to.x || 0
-  const toY = action.to.y || 0
+  // Handle EntityReference which can be either coordinates or player reference
+  const fromX = (action.from as any).x || 0
+  const fromY = (action.from as any).y || 0
+  const toX = (action.to as any).x || 0
+  const toY = (action.to as any).y || 0
 
   const handleClick = (e: any) => {
     if (readOnly || isPreview) return
