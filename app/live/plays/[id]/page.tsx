@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Play, PlayTag, PlayEffectiveness, DefenseType } from '@prisma/client'
+import { Layout } from '@/components/layout/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -114,72 +115,77 @@ export default function LivePlayView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading play...</p>
+      <Layout>
+        <div className="min-h-screen bg-gray-50 p-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading play...</p>
+            </div>
           </div>
         </div>
-      </div>
+      </Layout>
     )
   }
 
   if (!play) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Play not found</h3>
-            <p className="text-gray-600 mb-4">The requested play could not be found.</p>
-            <Link href="/live">
-              <Button>Return to Live Dashboard</Button>
-            </Link>
+      <Layout>
+        <div className="min-h-screen bg-gray-50 p-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Play not found</h3>
+              <p className="text-gray-600 mb-4">The requested play could not be found.</p>
+              <Link href="/live">
+                <Button>Return to Live Dashboard</Button>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </Layout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile-optimized header */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.back()}
-                className="shrink-0"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">{play.title}</h1>
-                <p className="text-sm text-gray-600">by {play.author.name}</p>
+    <Layout>
+      <div className="min-h-screen bg-gray-50">
+          {/* Mobile-optimized header */}
+          <div className="bg-white border-b border-gray-200 p-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => router.back()}
+                    className="shrink-0"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </Button>
+                  <div>
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900">{play.title}</h1>
+                    <p className="text-sm text-gray-600">by {play.author.name}</p>
+                  </div>
+                </div>
+              
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleFavorite}
+                    className={isFavorited ? 'text-red-600 border-red-300' : ''}
+                  >
+                    <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleShare}>
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleFavorite}
-                className={isFavorited ? 'text-red-600 border-red-300' : ''}
-              >
-                <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share2 className="w-4 h-4" />
-              </Button>
-            </div>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto p-4">
+          <div className="max-w-7xl mx-auto p-4">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Court Diagram - Large for tablet viewing */}
           <div className="xl:col-span-2">
@@ -252,7 +258,7 @@ export default function LivePlayView() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {play.effectiveness.map((eff) => (
+                  {play.effectiveness && play.effectiveness.length > 0 ? play.effectiveness.map((eff) => (
                     <div key={eff.id} className="flex items-center justify-between p-3 rounded-lg border">
                       <div>
                         <div className="font-medium text-sm">
@@ -272,7 +278,12 @@ export default function LivePlayView() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center py-6 text-gray-500">
+                      <div className="text-sm">No effectiveness data available</div>
+                      <div className="text-xs mt-1">This play hasn't been rated against specific defenses yet.</div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -324,7 +335,8 @@ export default function LivePlayView() {
             </Card>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </Layout>
   )
 }

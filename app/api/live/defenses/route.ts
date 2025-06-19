@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { DefenseType } from '@prisma/client'
 import { DEFENSE_TYPE_INFO } from '@/modules/live/types'
 
 export async function GET() {

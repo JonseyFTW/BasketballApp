@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { DefenseType } from '@prisma/client'
+import { DefenseTypeEnum } from '@/modules/live/types'
+import { Layout } from '@/components/layout/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,7 +16,7 @@ export default function DefenseSelection() {
   const router = useRouter()
   const [defenseTypes, setDefenseTypes] = useState<Record<string, DefenseTypeInfo[]>>({})
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedDefense, setSelectedDefense] = useState<DefenseType | null>(null)
+  const [selectedDefense, setSelectedDefense] = useState<DefenseTypeEnum | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function DefenseSelection() {
     fetchDefenseTypes()
   }, [])
 
-  const handleDefenseSelect = (defenseType: DefenseType) => {
+  const handleDefenseSelect = (defenseType: DefenseTypeEnum) => {
     setSelectedDefense(defenseType)
     // Redirect back to main page with selected defense
     const url = new URL('/live', window.location.origin)
@@ -126,8 +127,8 @@ export default function DefenseSelection() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-6xl mx-auto">
+    <Layout>
+      <div className="max-w-6xl mx-auto p-4">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
@@ -249,6 +250,6 @@ export default function DefenseSelection() {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   )
 }

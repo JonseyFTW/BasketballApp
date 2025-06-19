@@ -1,4 +1,4 @@
-import { PrismaClient, TagCategory, RelationType, UserRole } from '@prisma/client'
+import { PrismaClient, TagCategory, RelationType, UserRole, DefenseType, GameSituation } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -297,6 +297,68 @@ async function main() {
         notes: 'Go-to BLOB play',
       },
     })
+  }
+
+  // Add effectiveness data for plays
+  if (hornsPlay) {
+    const hornsEffectiveness = [
+      { defenseType: DefenseType.ZONE_2_3, rating: 8.5, difficulty: 6, situation: GameSituation.GENERAL },
+      { defenseType: DefenseType.ZONE_3_2, rating: 7.0, difficulty: 6, situation: GameSituation.GENERAL },
+      { defenseType: DefenseType.MAN_TO_MAN, rating: 7.5, difficulty: 5, situation: GameSituation.GENERAL },
+      { defenseType: DefenseType.HELP_AND_RECOVER, rating: 6.5, difficulty: 7, situation: GameSituation.GENERAL },
+    ]
+
+    for (const eff of hornsEffectiveness) {
+      await prisma.playEffectiveness.upsert({
+        where: {
+          playId_defenseType_situation: {
+            playId: hornsPlay.id,
+            defenseType: eff.defenseType,
+            situation: eff.situation
+          }
+        },
+        update: {},
+        create: {
+          playId: hornsPlay.id,
+          defenseType: eff.defenseType,
+          rating: eff.rating,
+          difficulty: eff.difficulty,
+          situation: eff.situation,
+          notes: `Effectiveness rating for ${eff.defenseType} defense`,
+          isVerified: true
+        }
+      })
+    }
+  }
+
+  if (boxPlay) {
+    const boxEffectiveness = [
+      { defenseType: DefenseType.ZONE_2_3, rating: 9.0, difficulty: 4, situation: GameSituation.BLOB },
+      { defenseType: DefenseType.MAN_TO_MAN, rating: 8.0, difficulty: 5, situation: GameSituation.BLOB },
+      { defenseType: DefenseType.SWITCHING_MAN, rating: 7.5, difficulty: 6, situation: GameSituation.BLOB },
+    ]
+
+    for (const eff of boxEffectiveness) {
+      await prisma.playEffectiveness.upsert({
+        where: {
+          playId_defenseType_situation: {
+            playId: boxPlay.id,
+            defenseType: eff.defenseType,
+            situation: eff.situation
+          }
+        },
+        update: {},
+        create: {
+          playId: boxPlay.id,
+          defenseType: eff.defenseType,
+          rating: eff.rating,
+          difficulty: eff.difficulty,
+          situation: eff.situation,
+          notes: `BLOB effectiveness vs ${eff.defenseType}`,
+          isVerified: true
+        }
+      })
+    }
   }
 
   console.log('Seeding finished.')

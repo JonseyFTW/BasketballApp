@@ -30,7 +30,11 @@
       "mcp__MCP_DOCKER__browser_take_screenshot",
       "Bash(node:*)",
       "Bash(npx ts-node:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "mcp__MCP_DOCKER__browser_install",
+      "Bash(npx next build:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker restart:*)"
     ],
     "deny": []
   }

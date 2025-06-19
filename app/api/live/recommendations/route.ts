@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient, DefenseType, GameSituation } from '@prisma/client'
-import { LiveRecommendationRequest, PlayRecommendation, LiveRecommendationResponse } from '@/modules/live/types'
+import { LiveRecommendationRequest, PlayRecommendation, LiveRecommendationResponse, DefenseTypeEnum } from '@/modules/live/types'
 
 const prisma = new PrismaClient()
 
@@ -17,38 +17,30 @@ export async function POST(request: NextRequest) {
     } = body
 
     // Validate required fields
-    if (!defenseType || !Object.values(DefenseType).includes(defenseType)) {
+    if (!defenseType || !Object.values(DefenseTypeEnum).includes(defenseType as DefenseTypeEnum)) {
       return NextResponse.json(
         { success: false, error: 'Valid defense type is required' },
         { status: 400 }
       )
     }
 
-    // Build query to find plays effective against this defense
-    const whereClause: any = {
-      effectiveness: {
-        some: {
-          defenseType: defenseType,
-          rating: {
-            gte: 6.0 // Only recommend plays with rating 6+ (good effectiveness)
+    // Build query to find plays - first try to get plays with effectiveness data
+    // If no effectiveness data exists, fall back to all plays with appropriate tags
+    let plays = await prisma.play.findMany({
+      where: {
+        effectiveness: {
+          some: {
+            defenseType: defenseType,
+            rating: {
+              gte: 6.0 // Only recommend plays with rating 6+ (good effectiveness)
+            }
           }
         }
-      }
-    }
-
-    // Add situation filter if provided
-    if (situation) {
-      whereClause.effectiveness.some.situation = situation
-    }
-
-    // Fetch plays with their effectiveness ratings
-    const plays = await prisma.play.findMany({
-      where: whereClause,
+      },
       include: {
         effectiveness: {
           where: {
-            defenseType: defenseType,
-            ...(situation && { situation })
+            defenseType: defenseType
           }
         },
         tags: true,
@@ -58,14 +50,59 @@ export async function POST(request: NextRequest) {
           }
         }
       },
-      take: maxResults * 2 // Get more than needed for filtering
+      take: maxResults * 3
     })
+
+    // If no plays found with effectiveness data, get all plays and create mock effectiveness
+    if (plays.length === 0) {
+      plays = await prisma.play.findMany({
+        include: {
+          effectiveness: true,
+          tags: true,
+          author: {
+            select: {
+              name: true
+            }
+          }
+        },
+        take: maxResults * 3
+      })
+    }
 
     // Process and rank recommendations
     const recommendations: PlayRecommendation[] = plays
       .map(play => {
-        const effectiveness = play.effectiveness[0] // Should only be one match
-        if (!effectiveness) return null
+        // Find the best effectiveness rating for this defense type
+        // Prioritize situation-specific ratings if available, otherwise use general ratings
+        let effectiveness = play.effectiveness.find(eff => 
+          eff.defenseType === defenseType && eff.situation === situation
+        )
+        if (!effectiveness) {
+          // Fall back to general effectiveness (no specific situation) or any effectiveness for this defense
+          effectiveness = play.effectiveness.find(eff => 
+            eff.defenseType === defenseType && (eff.situation === null || eff.situation === 'GENERAL')
+          )
+          if (!effectiveness) {
+            effectiveness = play.effectiveness.find(eff => eff.defenseType === defenseType)
+          }
+        }
+        
+        // If no effectiveness data exists for this defense type, create a mock one
+        if (!effectiveness) {
+          effectiveness = {
+            id: 'mock',
+            playId: play.id,
+            defenseType: defenseType,
+            rating: 5.0, // Default rating
+            successRate: null,
+            difficulty: 5,
+            situation: situation || 'GENERAL',
+            notes: 'No effectiveness data available - using default rating',
+            isVerified: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        }
 
         // Calculate overall rating considering multiple factors
         let overallRating = effectiveness.rating
@@ -89,6 +126,18 @@ export async function POST(request: NextRequest) {
           reasoning.push('Highly effective against this defense')
         } else if (effectiveness.rating >= 7.0) {
           reasoning.push('Good effectiveness against this defense')
+        } else if (effectiveness.id === 'mock') {
+          reasoning.push('Using default effectiveness rating - add specific data for better recommendations')
+        }
+
+        // Add situation-specific bonus and reasoning
+        if (situation && effectiveness.situation === situation) {
+          overallRating += 0.5 // Bonus for situation-specific rating
+          reasoning.push(`Specifically rated for ${situation.replace(/_/g, ' ').toLowerCase()} situations`)
+          confidence += 0.1
+        } else if (situation) {
+          reasoning.push('General effectiveness rating (no specific situation data)')
+          confidence -= 0.05 // Slight confidence penalty for not having situation-specific data
         }
 
         // Time-based adjustments for end game situations

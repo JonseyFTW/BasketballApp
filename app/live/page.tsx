@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DefenseType, GameSituation } from '@prisma/client'
+import { DefenseTypeEnum, GameSituationEnum } from '@/modules/live/types'
+import { Layout } from '@/components/layout/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,8 +11,8 @@ import { DefenseTypeInfo, GameSituationInfo, LiveRecommendationResponse } from '
 import Link from 'next/link'
 
 export default function LiveDashboard() {
-  const [selectedDefense, setSelectedDefense] = useState<DefenseType | null>(null)
-  const [selectedSituation, setSelectedSituation] = useState<GameSituation | null>(null)
+  const [selectedDefense, setSelectedDefense] = useState<DefenseTypeEnum | null>(null)
+  const [selectedSituation, setSelectedSituation] = useState<GameSituationEnum | null>(null)
   const [recommendations, setRecommendations] = useState<LiveRecommendationResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [gameContext, setGameContext] = useState({
@@ -24,8 +25,8 @@ export default function LiveDashboard() {
   // Handle URL parameters for defense selection
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
-    const defenseParam = urlParams.get('defense') as DefenseType
-    if (defenseParam && Object.values(DefenseType).includes(defenseParam)) {
+    const defenseParam = urlParams.get('defense') as DefenseTypeEnum
+    if (defenseParam && Object.values(DefenseTypeEnum).includes(defenseParam)) {
       setSelectedDefense(defenseParam)
     }
   }, [])
@@ -92,7 +93,7 @@ export default function LiveDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <Layout>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -214,11 +215,11 @@ export default function LiveDashboard() {
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { key: null, label: 'General' },
-                    { key: GameSituation.BLOB, label: 'BLOB' },
-                    { key: GameSituation.SLOB, label: 'SLOB' },
-                    { key: GameSituation.END_GAME, label: 'End Game' },
-                    { key: GameSituation.LAST_SHOT, label: 'Last Shot' },
-                    { key: GameSituation.QUICK_SCORE, label: 'Quick Score' }
+                    { key: GameSituationEnum.BLOB, label: 'BLOB' },
+                    { key: GameSituationEnum.SLOB, label: 'SLOB' },
+                    { key: GameSituationEnum.END_GAME, label: 'End Game' },
+                    { key: GameSituationEnum.LAST_SHOT, label: 'Last Shot' },
+                    { key: GameSituationEnum.QUICK_SCORE, label: 'Quick Score' }
                   ].map((situation) => (
                     <Button
                       key={situation.key || 'general'}
@@ -324,6 +325,6 @@ export default function LiveDashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   )
 }

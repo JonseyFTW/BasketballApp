@@ -89,6 +89,7 @@ export class PlayService {
             select: { id: true, name: true, email: true }
           },
           tags: true,
+          effectiveness: true,
           ...(includeRelations && {
             relationsFrom: {
               include: {
