@@ -117,14 +117,18 @@ export default function HomePage() {
                     <h4 className="font-medium">vs Lakers</h4>
                     <p className="text-sm text-gray-600">Tomorrow, 7:00 PM</p>
                   </div>
-                  <Button size="sm">View Plan</Button>
+                  <Link href="/gameplans">
+                    <Button size="sm">View Plan</Button>
+                  </Link>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <h4 className="font-medium">vs Warriors</h4>
                     <p className="text-sm text-gray-600">Next Friday, 8:00 PM</p>
                   </div>
-                  <Button size="sm" variant="outline">Create Plan</Button>
+                  <Link href="/gameplans?action=create">
+                    <Button size="sm" variant="outline">Create Plan</Button>
+                  </Link>
                 </div>
                 <Link href="/gameplans">
                   <Button variant="outline" size="sm" className="w-full mt-3">

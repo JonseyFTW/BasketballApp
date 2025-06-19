@@ -159,7 +159,6 @@ export default function GamePlanEditPage({ params }: GamePlanEditPageProps) {
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <p className="text-red-600">{error}</p>
           </div>
-        </div>
         )}
 
         {/* Form */}

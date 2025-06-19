@@ -93,14 +93,14 @@ export async function POST(request: NextRequest) {
 
         // Time-based adjustments for end game situations
         if (timeLeft && timeLeft < 120) { // Under 2 minutes
-          if (play.tags.some(tag => tag.name === 'End Game' || tag.name === 'Quick')) {
+          if (play.tags.some((tag: any) => tag.name === 'End Game' || tag.name === 'Quick')) {
             overallRating += 0.5
             reasoning.push('Designed for end-game situations')
           }
         }
 
         // Add tag-based reasoning
-        const playTypeTag = play.tags.find(tag => 
+        const playTypeTag = play.tags.find((tag: any) => 
           ['Motion', 'Pick and Roll', 'Horns', 'BLOB', 'SLOB'].includes(tag.name)
         )
         if (playTypeTag) {
@@ -108,15 +108,12 @@ export async function POST(request: NextRequest) {
         }
 
         return {
-          play: {
-            ...play,
-            author: play.author
-          },
+          play: play as any,
           effectiveness: [effectiveness],
           overallRating: Math.min(10, Math.max(1, overallRating)), // Clamp between 1-10
           confidence: Math.min(1, Math.max(0, confidence)),
           reasoning
-        }
+        } as PlayRecommendation
       })
       .filter((rec): rec is PlayRecommendation => rec !== null)
       .sort((a, b) => b.overallRating - a.overallRating) // Sort by rating descending

@@ -13,6 +13,7 @@ interface LayoutProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: '🏠' },
+  { name: 'Live', href: '/live', icon: '🔴' },
   { name: 'Plays', href: '/plays', icon: '🏀' },
   { name: 'Play Designer', href: '/designer', icon: '✏️' },
   { name: 'Game Plans', href: '/gameplans', icon: '📋' },
