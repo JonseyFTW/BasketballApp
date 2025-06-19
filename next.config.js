@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
   images: {
     domains: ['localhost'],
   },
@@ -11,6 +8,15 @@ const nextConfig = {
       canvas: 'commonjs canvas',
     });
     return config;
+  },
+  // Enable standalone output for Docker
+  output: 'standalone',
+  // Skip type checking during build in Docker
+  typescript: {
+    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === 'true',
+  },
+  eslint: {
+    ignoreDuringBuilds: process.env.SKIP_TYPE_CHECK === 'true',
   },
 };
 

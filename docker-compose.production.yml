@@ -1,0 +1,78 @@
+services:
+  # PostgreSQL Database Service (mimics Railway PostgreSQL)
+  postgres:
+    image: postgres:15-alpine
+    container_name: basketball-db-service
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: basketball_coach_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - railway-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Service (mimics Railway Redis)
+  redis:
+    image: redis:7-alpine
+    container_name: basketball-redis-service
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - railway-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Basketball App Service (mimics Railway App deployment)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: basketball-app-service
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@basketball-db-service:5432/basketball_coach_app?schema=public
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=basketball-coach-app-production-secret-key-32-chars-minimum
+      - REDIS_URL=redis://basketball-redis-service:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - railway-network
+    # Wait for database to be ready, then run migrations
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        while ! nc -z basketball-db-service 5432; do sleep 1; done &&
+        echo 'Database is ready!' &&
+        npx prisma db push --accept-data-loss &&
+        npm run db:seed &&
+        echo 'Starting application...' &&
+        node server.js
+      "
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  railway-network:
+    driver: bridge

@@ -101,6 +101,7 @@ model Play {
   relationsTo      PlayRelation[]      @relation("RelatedPlay")
   gamePlanItems    GamePlanItem[]
   adaptations      PlayAdaptation[]
+  effectiveness    PlayEffectiveness[]
 
   @@map("plays")
 }
@@ -168,6 +169,26 @@ model PlayAdaptation {
 
   @@unique([playId, playerProfileId])
   @@map("play_adaptations")
+}
+
+model PlayEffectiveness {
+  id              String      @id @default(cuid())
+  playId          String
+  defenseType     DefenseType
+  rating          Float       @default(5.0) // 1-10 effectiveness rating
+  successRate     Float?      // Optional statistical success rate percentage
+  difficulty      Int         @default(5)   // 1-10 difficulty to execute
+  situation       GameSituation?
+  notes           String?     // Additional context or coaching notes
+  isVerified      Boolean     @default(false) // Whether this rating is from verified data
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+
+  @@unique([playId, defenseType, situation])
+  @@map("play_effectiveness")
 }
 
 model GamePlan {
@@ -243,4 +264,48 @@ enum RelationType {
   DECOY
   SETUP
   ALTERNATIVE
+}
+
+enum DefenseType {
+  // Man-to-Man Defenses
+  MAN_TO_MAN           // Standard man-to-man
+  SWITCHING_MAN        // Switching on all screens
+  HELP_AND_RECOVER     // Help defense with recovery
+  DENIAL_DEFENSE       // Aggressive ball denial
+  
+  // Zone Defenses
+  ZONE_2_3             // 2-3 zone
+  ZONE_3_2             // 3-2 zone
+  ZONE_1_3_1           // 1-3-1 zone
+  ZONE_1_2_2           // 1-2-2 zone
+  MATCHUP_ZONE         // Matchup zone principles
+  
+  // Pressure Defenses
+  FULL_COURT_PRESS     // 1-2-1-1 full court press
+  HALF_COURT_PRESS     // Half court pressure
+  DIAMOND_PRESS        // 1-2-1-1 diamond formation
+  PRESS_2_2_1          // 2-2-1 press
+  
+  // Specialty Defenses
+  BOX_AND_ONE          // Box-and-one junk defense
+  TRIANGLE_AND_TWO     // Triangle-and-two junk defense
+  PACK_LINE            // Pack line defense
+  
+  // Transition Defense
+  GET_BACK_DEFENSE     // Transition get back
+  SLOW_BREAK_DEFENSE   // Organized transition D
+}
+
+enum GameSituation {
+  GENERAL              // General half court offense
+  BLOB                 // Baseline out of bounds
+  SLOB                 // Sideline out of bounds
+  END_GAME             // Last 2 minutes of game
+  LAST_SHOT            // Last shot situations
+  PRESS_BREAK          // Breaking pressure defense
+  QUICK_SCORE          // Need quick basket
+  FOUL_SITUATION       // When fouling or being fouled
+  TIMEOUT_PLAY         // Coming out of timeout
+  AFTER_MADE_BASKET    // After opponent scores
+  AFTER_TURNOVER       // After creating turnover
 }
