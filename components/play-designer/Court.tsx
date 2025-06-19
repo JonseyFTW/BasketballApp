@@ -1,16 +1,29 @@
 'use client'
 
 import React from 'react'
-import { Rect, Line, Circle, Arc, Path } from 'react-konva'
+import { Rect, Line, Circle, Arc } from 'react-konva'
 import { COURT_DIMENSIONS } from '@/modules/plays/types'
 
 export function Court() {
-  const { width, height, threePointLineRadius, keyWidth, keyHeight, basketPosition } = COURT_DIMENSIONS
+  const { width, height, keyWidth, keyHeight, basketPosition } = COURT_DIMENSIONS
 
   // Basketball court color
   const courtColor = '#D2691E' // Basketball court brown/orange
   const lineColor = '#FFFFFF' // White lines
   const lineWidth = 2
+
+  // Calculated dimensions for accurate court markings
+  const centerX = width / 2
+  const centerY = height / 2
+  
+  // Three-point line specific calculations (NBA/college standard proportions)
+  const threePointRadius = 237.5 // Radius of three-point arc (scaled for 800px court)
+  const cornerThreeDistance = 220 // Distance from basket to corner three
+  const threePointCornerY = 140 // How far the corner three extends from baseline
+  
+  // Free throw dimensions
+  const freeThrowRadius = 60
+  const restrictedAreaRadius = 40
 
   return (
     <>
@@ -36,8 +49,8 @@ export function Court() {
 
       {/* Center court circle */}
       <Circle
-        x={width / 2}
-        y={height / 2}
+        x={centerX}
+        y={centerY}
         radius={60}
         stroke={lineColor}
         strokeWidth={lineWidth}
@@ -46,8 +59,8 @@ export function Court() {
 
       {/* Center court small circle */}
       <Circle
-        x={width / 2}
-        y={height / 2}
+        x={centerX}
+        y={centerY}
         radius={12}
         stroke={lineColor}
         strokeWidth={lineWidth}
@@ -56,7 +69,7 @@ export function Court() {
 
       {/* Center line (half court line) */}
       <Line
-        points={[0, height / 2, width, height / 2]}
+        points={[0, centerY, width, centerY]}
         stroke={lineColor}
         strokeWidth={lineWidth}
       />
@@ -65,7 +78,7 @@ export function Court() {
       
       {/* Top key/paint area */}
       <Rect
-        x={(width - keyWidth) / 2}
+        x={centerX - keyWidth / 2}
         y={0}
         width={keyWidth}
         height={keyHeight}
@@ -76,9 +89,9 @@ export function Court() {
 
       {/* Top free throw circle */}
       <Circle
-        x={width / 2}
+        x={centerX}
         y={keyHeight}
-        radius={60}
+        radius={freeThrowRadius}
         stroke={lineColor}
         strokeWidth={lineWidth}
         fill="transparent"
@@ -86,17 +99,17 @@ export function Court() {
 
       {/* Top free throw line */}
       <Line
-        points={[(width - keyWidth) / 2, keyHeight, (width + keyWidth) / 2, keyHeight]}
+        points={[centerX - keyWidth / 2, keyHeight, centerX + keyWidth / 2, keyHeight]}
         stroke={lineColor}
         strokeWidth={lineWidth}
       />
 
-      {/* Top three-point arc */}
+      {/* Top three-point arc - proper arc that doesn't extend to sidelines */}
       <Arc
         x={basketPosition.x}
         y={basketPosition.y}
-        innerRadius={threePointLineRadius}
-        outerRadius={threePointLineRadius}
+        innerRadius={threePointRadius}
+        outerRadius={threePointRadius}
         angle={180}
         rotation={270}
         stroke={lineColor}
@@ -104,14 +117,24 @@ export function Court() {
         fill="transparent"
       />
 
-      {/* Top three-point line corners */}
+      {/* Top three-point corner lines - straight lines from arc to baseline */}
       <Line
-        points={[basketPosition.x - threePointLineRadius * 0.86, 0, basketPosition.x - threePointLineRadius * 0.86, basketPosition.y - threePointLineRadius * 0.5]}
+        points={[
+          basketPosition.x - cornerThreeDistance, 
+          basketPosition.y - Math.sqrt(threePointRadius * threePointRadius - cornerThreeDistance * cornerThreeDistance),
+          basketPosition.x - cornerThreeDistance, 
+          0
+        ]}
         stroke={lineColor}
         strokeWidth={lineWidth}
       />
       <Line
-        points={[basketPosition.x + threePointLineRadius * 0.86, 0, basketPosition.x + threePointLineRadius * 0.86, basketPosition.y - threePointLineRadius * 0.5]}
+        points={[
+          basketPosition.x + cornerThreeDistance, 
+          basketPosition.y - Math.sqrt(threePointRadius * threePointRadius - cornerThreeDistance * cornerThreeDistance),
+          basketPosition.x + cornerThreeDistance, 
+          0
+        ]}
         stroke={lineColor}
         strokeWidth={lineWidth}
       />
@@ -137,8 +160,8 @@ export function Court() {
       <Arc
         x={basketPosition.x}
         y={basketPosition.y}
-        innerRadius={40}
-        outerRadius={40}
+        innerRadius={restrictedAreaRadius}
+        outerRadius={restrictedAreaRadius}
         angle={180}
         rotation={270}
         stroke={lineColor}
@@ -150,7 +173,7 @@ export function Court() {
       
       {/* Bottom key/paint area */}
       <Rect
-        x={(width - keyWidth) / 2}
+        x={centerX - keyWidth / 2}
         y={height - keyHeight}
         width={keyWidth}
         height={keyHeight}
@@ -161,9 +184,9 @@ export function Court() {
 
       {/* Bottom free throw circle */}
       <Circle
-        x={width / 2}
+        x={centerX}
         y={height - keyHeight}
-        radius={60}
+        radius={freeThrowRadius}
         stroke={lineColor}
         strokeWidth={lineWidth}
         fill="transparent"
@@ -171,7 +194,7 @@ export function Court() {
 
       {/* Bottom free throw line */}
       <Line
-        points={[(width - keyWidth) / 2, height - keyHeight, (width + keyWidth) / 2, height - keyHeight]}
+        points={[centerX - keyWidth / 2, height - keyHeight, centerX + keyWidth / 2, height - keyHeight]}
         stroke={lineColor}
         strokeWidth={lineWidth}
       />
@@ -180,8 +203,8 @@ export function Court() {
       <Arc
         x={basketPosition.x}
         y={height - basketPosition.y}
-        innerRadius={threePointLineRadius}
-        outerRadius={threePointLineRadius}
+        innerRadius={threePointRadius}
+        outerRadius={threePointRadius}
         angle={180}
         rotation={90}
         stroke={lineColor}
@@ -189,14 +212,24 @@ export function Court() {
         fill="transparent"
       />
 
-      {/* Bottom three-point line corners */}
+      {/* Bottom three-point corner lines */}
       <Line
-        points={[basketPosition.x - threePointLineRadius * 0.86, height, basketPosition.x - threePointLineRadius * 0.86, height - basketPosition.y + threePointLineRadius * 0.5]}
+        points={[
+          basketPosition.x - cornerThreeDistance, 
+          height - basketPosition.y + Math.sqrt(threePointRadius * threePointRadius - cornerThreeDistance * cornerThreeDistance),
+          basketPosition.x - cornerThreeDistance, 
+          height
+        ]}
         stroke={lineColor}
         strokeWidth={lineWidth}
       />
       <Line
-        points={[basketPosition.x + threePointLineRadius * 0.86, height, basketPosition.x + threePointLineRadius * 0.86, height - basketPosition.y + threePointLineRadius * 0.5]}
+        points={[
+          basketPosition.x + cornerThreeDistance, 
+          height - basketPosition.y + Math.sqrt(threePointRadius * threePointRadius - cornerThreeDistance * cornerThreeDistance),
+          basketPosition.x + cornerThreeDistance, 
+          height
+        ]}
         stroke={lineColor}
         strokeWidth={lineWidth}
       />
@@ -222,8 +255,8 @@ export function Court() {
       <Arc
         x={basketPosition.x}
         y={height - basketPosition.y}
-        innerRadius={40}
-        outerRadius={40}
+        innerRadius={restrictedAreaRadius}
+        outerRadius={restrictedAreaRadius}
         angle={180}
         rotation={90}
         stroke={lineColor}
@@ -231,28 +264,32 @@ export function Court() {
         fill="transparent"
       />
 
-      {/* Hash marks inside the key */}
+      {/* Hash marks inside the key - properly spaced */}
       {/* Top key hash marks */}
-      <Line points={[(width - keyWidth) / 2 + 10, 70, (width - keyWidth) / 2 + 20, 70]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width + keyWidth) / 2 - 20, 70, (width + keyWidth) / 2 - 10, 70]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width - keyWidth) / 2 + 10, 100, (width - keyWidth) / 2 + 20, 100]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width + keyWidth) / 2 - 20, 100, (width + keyWidth) / 2 - 10, 100]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width - keyWidth) / 2 + 10, 130, (width - keyWidth) / 2 + 20, 130]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width + keyWidth) / 2 - 20, 130, (width + keyWidth) / 2 - 10, 130]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, 70, centerX - keyWidth / 2 + 18, 70]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, 70, centerX + keyWidth / 2 - 8, 70]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, 100, centerX - keyWidth / 2 + 18, 100]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, 100, centerX + keyWidth / 2 - 8, 100]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, 130, centerX - keyWidth / 2 + 18, 130]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, 130, centerX + keyWidth / 2 - 8, 130]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, 160, centerX - keyWidth / 2 + 18, 160]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, 160, centerX + keyWidth / 2 - 8, 160]} stroke={lineColor} strokeWidth={lineWidth} />
 
       {/* Bottom key hash marks */}
-      <Line points={[(width - keyWidth) / 2 + 10, height - 70, (width - keyWidth) / 2 + 20, height - 70]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width + keyWidth) / 2 - 20, height - 70, (width + keyWidth) / 2 - 10, height - 70]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width - keyWidth) / 2 + 10, height - 100, (width - keyWidth) / 2 + 20, height - 100]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width + keyWidth) / 2 - 20, height - 100, (width + keyWidth) / 2 - 10, height - 100]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width - keyWidth) / 2 + 10, height - 130, (width - keyWidth) / 2 + 20, height - 130]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[(width + keyWidth) / 2 - 20, height - 130, (width + keyWidth) / 2 - 10, height - 130]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, height - 70, centerX - keyWidth / 2 + 18, height - 70]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, height - 70, centerX + keyWidth / 2 - 8, height - 70]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, height - 100, centerX - keyWidth / 2 + 18, height - 100]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, height - 100, centerX + keyWidth / 2 - 8, height - 100]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, height - 130, centerX - keyWidth / 2 + 18, height - 130]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, height - 130, centerX + keyWidth / 2 - 8, height - 130]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX - keyWidth / 2 + 8, height - 160, centerX - keyWidth / 2 + 18, height - 160]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[centerX + keyWidth / 2 - 18, height - 160, centerX + keyWidth / 2 - 8, height - 160]} stroke={lineColor} strokeWidth={lineWidth} />
 
-      {/* Side court coaching box lines */}
-      <Line points={[0, 50, 20, 50]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[width - 20, 50, width, 50]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[0, height - 50, 20, height - 50]} stroke={lineColor} strokeWidth={lineWidth} />
-      <Line points={[width - 20, height - 50, width, height - 50]} stroke={lineColor} strokeWidth={lineWidth} />
+      {/* Coaching box lines */}
+      <Line points={[0, centerY - 140, 20, centerY - 140]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[width - 20, centerY - 140, width, centerY - 140]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[0, centerY + 140, 20, centerY + 140]} stroke={lineColor} strokeWidth={lineWidth} />
+      <Line points={[width - 20, centerY + 140, width, centerY + 140]} stroke={lineColor} strokeWidth={lineWidth} />
     </>
   )
 }
