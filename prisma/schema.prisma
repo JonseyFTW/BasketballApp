@@ -89,6 +89,7 @@ model Play {
   title        String
   description  String?
   diagramJSON  Json     // Stores the play diagram data (positions, movements, etc.)
+  animationData Json?   // Stores animation sequences, keyframes, and settings
   authorId     String
   shareToken   String?  @unique // For public sharing
   createdAt    DateTime @default(now())
@@ -102,6 +103,7 @@ model Play {
   gamePlanItems    GamePlanItem[]
   adaptations      PlayAdaptation[]
   effectiveness    PlayEffectiveness[]
+  animations       PlayAnimation[]
 
   @@map("plays")
 }
@@ -308,4 +310,22 @@ enum GameSituation {
   TIMEOUT_PLAY         // Coming out of timeout
   AFTER_MADE_BASKET    // After opponent scores
   AFTER_TURNOVER       // After creating turnover
+}
+
+model PlayAnimation {
+  id              String   @id @default(cuid())
+  playId          String
+  name            String
+  description     String?
+  duration        Int      // Duration in milliseconds
+  sequenceData    Json     // Animation frames, keyframes, and movement paths
+  settings        Json     // Animation playback settings (fps, autoplay, etc.)
+  isDefault       Boolean  @default(false) // Whether this is the default animation for the play
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+
+  @@map("play_animations")
 }

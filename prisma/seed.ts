@@ -44,12 +44,23 @@ async function main() {
 
   // Create demo team
   const demoTeam = await prisma.team.upsert({
-    where: { id: 'demo-team' },
+    where: { id: '1' },
     update: {},
     create: {
-      id: 'demo-team',
+      id: '1',
       name: 'Demo Basketball Team',
       description: 'Demo team for testing the application',
+    },
+  })
+
+  // Create additional demo team
+  const demoTeam2 = await prisma.team.upsert({
+    where: { id: '2' },
+    update: {},
+    create: {
+      id: '2',
+      name: 'Demo Team Two',
+      description: 'Second demo team for testing',
     },
   })
 
@@ -138,10 +149,10 @@ async function main() {
 
   for (const player of demoPlayers) {
     await prisma.playerProfile.upsert({
-      where: { id: `player-${player.number}` },
+      where: { id: `${player.number}` },
       update: {},
       create: {
-        id: `player-${player.number}`,
+        id: `${player.number}`,
         name: player.name,
         number: player.number,
         position: player.position,
@@ -248,10 +259,10 @@ async function main() {
 
   // Create sample game plan
   const sampleGamePlan = await prisma.gamePlan.upsert({
-    where: { id: 'demo-gameplan' },
+    where: { id: '1' },
     update: {},
     create: {
-      id: 'demo-gameplan',
+      id: '1',
       title: 'vs Lakers Game Plan',
       description: 'Game plan for upcoming game against Lakers',
       opponent: 'Lakers',
@@ -360,6 +371,20 @@ async function main() {
       })
     }
   }
+
+  // Create second game plan
+  const sampleGamePlan2 = await prisma.gamePlan.upsert({
+    where: { id: '2' },
+    update: {},
+    create: {
+      id: '2',
+      title: 'vs Warriors Game Plan',
+      description: 'Game plan for upcoming game against Warriors',
+      opponent: 'Warriors',
+      defenseType: 'Man',
+      createdById: demoCoach.id,
+    },
+  })
 
   console.log('Seeding finished.')
 }

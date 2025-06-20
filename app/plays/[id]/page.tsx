@@ -110,6 +110,13 @@ export default function PlayDetailPage({ params }: PlayDetailPageProps) {
             <Button
               variant="default"
               size="sm"
+              onClick={() => router.push(`/plays/${play.id}/animate`)}
+            >
+              ▶️ Animate
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => router.push(`/designer?playId=${play.id}`)}
             >
               ✏️ Edit

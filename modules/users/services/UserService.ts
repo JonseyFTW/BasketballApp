@@ -386,6 +386,33 @@ export class UserService {
     }
   }
 
+  async getPlayerProfileById(id: string) {
+    try {
+      const player = await prisma.playerProfile.findUnique({
+        where: { id },
+        include: {
+          team: {
+            select: { id: true, name: true, description: true }
+          },
+          coach: {
+            select: { id: true, name: true, email: true }
+          },
+          adaptations: {
+            include: {
+              play: {
+                select: { id: true, title: true }
+              }
+            }
+          }
+        },
+      })
+
+      return player
+    } catch (error) {
+      throw handleServiceError(error)
+    }
+  }
+
   async getPlayerProfiles(params: PlayerQueryParams = {}) {
     try {
       const {
@@ -508,6 +535,35 @@ export class UserService {
             select: { id: true, name: true, email: true, role: true }
           },
           players: true,
+          _count: {
+            select: { users: true, players: true }
+          }
+        },
+      })
+
+      return team
+    } catch (error) {
+      throw handleServiceError(error)
+    }
+  }
+
+  async getTeamById(id: string, includeMembers = true) {
+    try {
+      const team = await prisma.team.findUnique({
+        where: { id },
+        include: {
+          ...(includeMembers && {
+            users: {
+              select: { id: true, name: true, email: true, role: true }
+            },
+            players: {
+              include: {
+                coach: {
+                  select: { id: true, name: true, email: true }
+                }
+              }
+            }
+          }),
           _count: {
             select: { users: true, players: true }
           }

@@ -1,5 +1,6 @@
 import { Play, PlayTag, PlayRelation, RelationType, TagCategory } from '@prisma/client'
 import { PlayDiagram, BaseEntity, PlayerAttributes } from '../../common/types'
+import { AnimationSequence } from './animation'
 
 // Extended Play type with relations
 export interface PlayWithRelations extends Play {
@@ -11,6 +12,7 @@ export interface PlayWithRelations extends Play {
   tags: PlayTag[]
   relationsFrom: PlayRelationWithPlay[]
   relationsTo: PlayRelationWithPlay[]
+  animations?: AnimationSequence[]
   _count?: {
     relationsFrom: number
     relationsTo: number

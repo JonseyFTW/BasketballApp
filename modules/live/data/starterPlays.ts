@@ -358,7 +358,12 @@ export const STARTER_PLAYS: StarterPlayData[] = [
         { id: '4', label: '4', x: 300, y: 350 }, // Screen setter
         { id: '5', label: '5', x: 500, y: 150 }  // Second screener
       ],
-      actions: [],
+      actions: [
+        { id: 'screen1', type: 'screen', from: { playerId: '4' }, to: { playerId: '2' } },
+        { id: 'cut1', type: 'cut', from: { playerId: '2' }, to: { x: 400, y: 300 } },
+        { id: 'screen2', type: 'screen', from: { playerId: '5' }, to: { playerId: '2' } },
+        { id: 'cut2', type: 'cut', from: { playerId: '2' }, to: { x: 300, y: 200 } }
+      ],
       courtDimensions: { width: 800, height: 600, threePointLineRadius: 280, keyWidth: 160, keyHeight: 190, basketPosition: { x: 400, y: 50 } }
     },
     effectiveness: [
